@@ -16,7 +16,7 @@ resource "aws_instance" "VM_bastion" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public.id
-  private_ip    = "192.168.1.10"
+  private_ip    = "192.168.1.2"
   key_name      = aws_key_pair.bastion_key.key_name
   security_groups = [aws_security_group.bastion_sg.id]
 
@@ -43,7 +43,7 @@ resource "aws_instance" "VM_Loadbalancer" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public.id
-  private_ip    = "192.168.1.11"
+  private_ip    = "192.168.1.1"
   key_name      = aws_key_pair.admin_key.key_name
 
   associate_public_ip_address = true
@@ -151,7 +151,7 @@ resource "aws_instance" "VM_jenkins" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.private_app.id
-  private_ip    = "192.168.10.21"
+  private_ip    = "192.168.10.15"
   key_name      = aws_key_pair.admin_key.key_name
 
   vpc_security_group_ids = [
@@ -167,7 +167,9 @@ resource "aws_instance" "VM_jenkins" {
               sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
               apt-get update -y
               apt-get install -y jenkins
-              systemctl enable jenkins
+              systemctl enable jenkin }
+      - { name: "docker3", address: "192.168.10.13", port: 80 }
+  tasks:s
               systemctl start jenkins
               EOF
 
@@ -185,7 +187,7 @@ resource "aws_instance" "VM_monitoring" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.private_db.id
-  private_ip    = "192.168.20.22"
+  private_ip    = "192.168.20.21"
   key_name      = aws_key_pair.admin_key.key_name
 
   vpc_security_group_ids = [aws_security_group.internal_ssh_sg.id]
@@ -196,21 +198,6 @@ resource "aws_instance" "VM_monitoring" {
               apt-get install -y docker.io docker-compose
               systemctl start docker
               systemctl enable docker
-              
-              mkdir -p /opt/monitoring
-              cat > /opt/monitoring/docker-compose.yml <<EOL
-              version: '3'
-              services:
-                prometheus:
-                  image: prom/prometheus
-                  ports:
-                    - "9090:9090"
-                grafana:
-                  image: grafana/grafana
-                  ports:
-                    - "3000:3000"
-              EOL
-              cd /opt/monitoring && docker-compose up -d
               EOF
 
   tags = {
