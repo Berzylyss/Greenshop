@@ -167,9 +167,7 @@ resource "aws_instance" "VM_jenkins" {
               sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
               apt-get update -y
               apt-get install -y jenkins
-              systemctl enable jenkin }
-      - { name: "docker3", address: "192.168.10.13", port: 80 }
-  tasks:s
+              systemctl enable jenkin 
               systemctl start jenkins
               EOF
 
